@@ -1,5 +1,7 @@
 # nitpicky
 
+![Nitpicky triage portal, dark mode](docs/demo-dark.png)
+
 Pre-launch polish sweep for your UI: parallel review agents walk your entire running
 app, one concern each, and screenshot every page and state to surface the little
 defects that get normalized during a build. You triage each one in a local decision
