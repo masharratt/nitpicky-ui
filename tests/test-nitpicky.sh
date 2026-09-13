@@ -3,7 +3,7 @@
 # Run: bash "$HOME/.claude/skills/nitpicky/tests/test-nitpicky.sh"
 set -uo pipefail
 
-SKILL_DIR="${HOME}/.claude/skills/nitpicky"
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY=python3
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

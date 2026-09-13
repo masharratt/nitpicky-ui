@@ -169,9 +169,13 @@ def aggregate_coverage(run_meta, lens_docs):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-dir", required=True)
-    ap.add_argument("--skill-dir", default=os.path.expanduser("~/.claude/skills/nitpicky"))
+    ap.add_argument("--skill-dir", default=None,
+                    help="dir containing review/template.html "
+                         "(default: this script's repo root)")
     args = ap.parse_args()
     run_dir = Path(args.run_dir)
+    skill_dir = (Path(args.skill_dir) if args.skill_dir
+                 else Path(__file__).resolve().parent.parent)
 
     run_meta_path = run_dir / "run.json"
     if not run_meta_path.is_file():
@@ -274,7 +278,7 @@ def main() -> int:
     tmp.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
     tmp.replace(out)
 
-    template = Path(args.skill_dir) / "review" / "template.html"
+    template = skill_dir / "review" / "template.html"
     html = template.read_text()
     if html.count(PLACEHOLDER) != 1:
         print(f"nitpicky-merge: template must contain exactly one {PLACEHOLDER}", file=sys.stderr)
