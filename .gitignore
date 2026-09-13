@@ -2,3 +2,4 @@ planning/
 *.log
 __pycache__/
 .playwright-mcp/
+examples/*/server.json

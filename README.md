@@ -69,6 +69,23 @@ nitpicky review --run-dir planning/nitpicky/<run-id>   # triage; decisions autos
 nitpicky export --run-dir planning/nitpicky/<run-id>   # writes CHECKLIST.md
 ```
 
+## Decision dashboard
+
+The review workspace has a filter sidebar, clickable decision totals, searchable
+findings, and side-by-side evidence. Use **Next undecided** to move through the
+current filtered set. Finding IDs are shareable links within the local review.
+**Fix** includes a finding in the checklist, **Defer** keeps it for later, and
+**Deny** dismisses it. Click the selected decision again to clear it. Notes autosave;
+watch the save indicator and use **Retry save** if the server is unavailable.
+
+On smaller screens, **Filters** expands the sidebar controls. Screenshots open in a
+keyboard-accessible dialog. Dark and light themes remember your choice. **Reset**
+clears filters without changing decisions. Review totals cover the whole run; the
+results line shows how many findings match your filters.
+
+Existing runs retain their generated page until they are regenerated with
+`nitpicky merge --run-dir <run-dir>`. This does not replace `decisions.json`.
+
 ## Any findings source, any UI
 
 The merge consumes every `*.json` in `findings/` that matches
@@ -94,7 +111,20 @@ bash tests/test-nitpicky.sh       # core: merge, ids, portal server, validation,
 bash tests/test-cli-adapters.sh   # CLI, axe/lighthouse adapters, schema examples
 ```
 
-CI runs shellcheck and both suites on every push.
+CI runs shellcheck and both shell suites on every push.
+
+For dashboard changes, also run the browser regression suite with Playwright
+installed as a development dependency and its Chromium browser available:
+
+```bash
+node tests/test-portal-ui.cjs
+```
+
+`PLAYWRIGHT_MODULE` can point to an existing Playwright installation, and
+`CHROME_PATH` can select an existing Chrome executable. The suite keeps Chromium's
+sandbox enabled and creates a disposable review with its own decision file. It
+covers filtering, navigation, saves and Retry, final-item persistence, bulk actions,
+export, dialogs, themes, mobile layout, and server restart.
 
 ## License
 

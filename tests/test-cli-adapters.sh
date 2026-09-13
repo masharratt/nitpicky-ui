@@ -13,6 +13,9 @@ PASS=0
 FAIL=0
 ok() { PASS=$((PASS + 1)); }
 fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
+assert_eq() {
+  if [[ "$1" == "$2" ]]; then ok; else fail "$3: expected [$2], got [$1]"; fi
+}
 assert_contains() {
   if grep -qF -- "$2" <<<"$1"; then ok; else fail "$3: missing [$2]"; fi
 }
