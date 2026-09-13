@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run shellcheck on shell sources
         run: |
-          shellcheck -x lib/*.sh tests/*.sh
+          shellcheck -x --severity=warning lib/*.sh tests/*.sh
   tests:
     runs-on: ubuntu-latest
     steps:

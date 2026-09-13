@@ -53,7 +53,7 @@ grep -q 'http://localhost:3000' "$RUN_A/run.json" && ok || fail "T9 run.json mis
 # T1: merge happy path — merges lenses, writes findings.json + review.html
 write_lens "$RUN_A" consistency "[$(finding 'screenshots/consistency-cart.png' 'Cart says Remove item' 'Cart says Delete item')]"
 write_lens "$RUN_A" friction "[$(finding 'screenshots/friction-checkout.png' 'Checkout needs 6 clicks' 'Checkout needs 3 clicks')]"
-MERGE_OUT="$("$PY" "$SKILL_DIR/lib/merge-findings.py" --run-dir "$RUN_A" 2>&1)"
+"$PY" "$SKILL_DIR/lib/merge-findings.py" --run-dir "$RUN_A" >/dev/null 2>&1
 MERGE_RC=$?
 assert_eq "$MERGE_RC" "0" "T1 merge exit code"
 [ -f "$RUN_A/findings.json" ] && ok || fail "T1 findings.json not written"
