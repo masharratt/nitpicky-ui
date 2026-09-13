@@ -187,6 +187,12 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/api/decisions":
             self._json(200, self.state.snapshot())
+        elif path == "/api/health":
+            snap = self.state.snapshot()
+            decided = sum(1 for rec in snap["decisions"].values()
+                          if rec.get("decision") in ("fix", "defer", "deny"))
+            self._json(200, {"ok": True, "run_id": self.state.run_id,
+                             "url": self.state.app_url, "decided": decided})
         elif path in ("/", "/review.html"):
             self._static("review.html")
         elif path == "/findings.json":
@@ -243,10 +249,31 @@ def _findings_by_id(state: PortalState) -> dict:
         (state.run_dir / "findings.json").read_text()).get("findings", [])}
 
 
+def _open_browser(url: str) -> None:
+    """Best-effort hand-off to the user's browser (WSL2-aware). Never raises."""
+    import shutil
+    import subprocess
+    for cmd in (
+        ["wslview", url],
+        ["explorer.exe", url],
+        ["cmd.exe", "/c", "start", "", url],
+        ["xdg-open", url],
+    ):
+        if shutil.which(cmd[0]):
+            try:
+                subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL)
+                return
+            except OSError:
+                continue
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-dir", required=True)
     ap.add_argument("--port", type=int, default=0, help="0 = pick a free port")
+    ap.add_argument("--open", action="store_true",
+                    help="open the review page in the user's browser")
     args = ap.parse_args(argv)
     run_dir = Path(args.run_dir).resolve()
     if not (run_dir / "findings.json").is_file():
@@ -275,6 +302,9 @@ def main(argv=None) -> int:
             "started": now_iso(), "run_dir": str(run_dir)}
     (run_dir / "server.json").write_text(json.dumps(info, indent=2) + "\n")
     print(json.dumps(info), flush=True)
+
+    if getattr(args, "open", False):
+        _open_browser(url)
 
     try:
         httpd.serve_forever()

@@ -31,6 +31,8 @@ def main(argv: list | None = None) -> int:
     p_review = sub.add_parser("review", help="serve the triage portal")
     p_review.add_argument("run_dir")
     p_review.add_argument("--port", type=int, default=0, help="0 = pick a free port")
+    p_review.add_argument("--open", action="store_true",
+                          help="open the review page in the browser")
 
     p_export = sub.add_parser("export", help="write CHECKLIST.md from saved decisions")
     p_export.add_argument("run_dir")
@@ -61,7 +63,10 @@ def main(argv: list | None = None) -> int:
         return merge.main(["--run-dir", args.run_dir])
     if args.cmd == "review":
         from nitpicky import portal
-        return portal.main(["--run-dir", args.run_dir, "--port", str(args.port)])
+        argv = ["--run-dir", args.run_dir, "--port", str(args.port)]
+        if args.open:
+            argv.append("--open")
+        return portal.main(argv)
     if args.cmd == "export":
         from nitpicky import checklist
         return checklist.main(["--run-dir", args.run_dir,

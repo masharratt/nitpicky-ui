@@ -189,6 +189,8 @@ SID2="$("$PY" -c "import json;d=json.load(open('$RUN_S/findings.json'));print(d[
 SID3="$("$PY" -c "import json;d=json.load(open('$RUN_S/findings.json'));print(d['findings'][2]['id'])")"
 
 api_get_code "/api/decisions" 200 "T10 GET decisions"
+HEALTH="$(curl -s "$BASE/api/health")"
+assert_contains "$HEALTH" '"decided": 0' "T10 health endpoint reports decided count"
 api_post "/api/decision" "{\"id\":\"$SID1\",\"decision\":\"fix\",\"explanation\":\"note one\"}" 200 "T10 valid patch"
 [ -f "$RUN_S/decisions.json" ] && ok || fail "T10 decisions.json not written to disk"
 grep -q '"note one"' "$RUN_S/decisions.json" && ok || fail "T10 explanation not in decisions.json"

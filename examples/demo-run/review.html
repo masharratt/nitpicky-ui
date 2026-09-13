@@ -5,9 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 <title>Nitpicky Review</title>
+<script>
+/* dark is the default; a stored choice wins. Applied pre-paint to avoid flash. */
+(function () {
+  var t = "dark";
+  try { t = localStorage.getItem("nitpicky-theme") || "dark"; } catch (e) {}
+  document.documentElement.dataset.theme = (t === "light") ? "light" : "dark";
+})();
+</script>
 <style>
   :root {
-    color-scheme: light dark;
+    color-scheme: dark;
+    --bg: #14161a;
+    --surface: #1d2026;
+    --surface-2: #262a31;
+    --text: #e8eaed;
+    --text-dim: #9aa3af;
+    --line: #363c45;
+    --accent: #7d9ef7;
+    --accent-soft: #24304d;
+    --fix: #4ec06a;
+    --fix-soft: #1d3527;
+    --defer: #d9a52a;
+    --defer-soft: #3a3016;
+    --deny: #ef6b61;
+    --deny-soft: #3c211f;
+    --high: #ef6b61;
+    --medium: #d9a52a;
+    --low: #9aa3af;
+    --radius: 10px;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
     --bg: #f6f7f9;
     --surface: #ffffff;
     --surface-2: #eef0f3;
@@ -25,28 +54,6 @@
     --high: #b3261e;
     --medium: #9a6700;
     --low: #57606a;
-    --radius: 10px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #14161a;
-      --surface: #1d2026;
-      --surface-2: #262a31;
-      --text: #e8eaed;
-      --text-dim: #9aa3af;
-      --line: #363c45;
-      --accent: #7d9ef7;
-      --accent-soft: #24304d;
-      --fix: #4ec06a;
-      --fix-soft: #1d3527;
-      --defer: #d9a52a;
-      --defer-soft: #3a3016;
-      --deny: #ef6b61;
-      --deny-soft: #3c211f;
-      --high: #ef6b61;
-      --medium: #d9a52a;
-      --low: #9aa3af;
-    }
   }
   * { box-sizing: border-box; }
   body {
@@ -208,6 +215,7 @@
     <div class="head-actions">
       <span id="save-status" role="status" aria-live="polite"></span>
       <button id="btn-retry" hidden>Retry save</button>
+      <button id="btn-theme" title="Toggle dark / light">☀️</button>
       <button id="btn-export" class="primary">Export checklist</button>
     </div>
   </div>
@@ -277,7 +285,7 @@
   </div>
 </div>
 
-<script type="application/json" id="nitpicky-payload">{"run_id": "20260912-213704", "app_url": "http://localhost:3000", "generated": "2026-09-13T04:37:04+00:00", "counts": {"total": 5, "by_lens": {"consistency": 2, "friction": 3}}, "env_summary": {"suspected_env_findings": 1}, "clusters": {}, "coverage": {"expected": [], "covered": ["/cart", "/checkout"], "blocked": [], "skipped": [{"path": "/settings", "note": "requires admin login", "lens": "consistency"}], "uncovered_expected": []}, "findings": [{"id": "NP-d83941", "lens": "consistency", "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout", "expected": "One verb for the same action everywhere", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/consistency-order-verb.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-d14e24", "lens": "consistency", "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'", "expected": "One term per concept", "url": "http://localhost:3000/settings", "severity": "low", "area": "Settings", "steps": "", "screenshot": "screenshots/consistency-settings-title.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-e5500b", "lens": "friction", "what": "Address form forgets every field when validation fails", "expected": "Keep valid input; mark only the failing fields", "url": "http://localhost:3000/checkout", "severity": "high", "area": "Checkout", "steps": "", "screenshot": "screenshots/friction-address-form.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-979392", "lens": "friction", "what": "Empty cart shows a blank page with no call to action", "expected": "Empty state with 'Browse products' action", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/friction-empty-cart.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-5237c0", "lens": "friction", "what": "Analytics dashboard stuck on spinner for 30s, no feedback", "expected": "Loading skeleton or explicit error", "url": "http://localhost:3000/analytics", "severity": "medium", "area": "Analytics", "steps": "", "screenshot": "screenshots/friction-analytics-spinner.png", "proof_ok": true, "suspected_env_cause": true, "evidence_flag": "duplicate-image"}]}</script>
+<script type="application/json" id="nitpicky-payload">{"run_id": "20260912-213704", "app_url": "http://localhost:3000", "generated": "2026-09-13T04:56:16+00:00", "counts": {"total": 5, "by_lens": {"consistency": 2, "friction": 3}}, "env_summary": {"suspected_env_findings": 1}, "clusters": {}, "coverage": {"expected": [], "covered": ["/cart", "/checkout"], "blocked": [], "skipped": [{"path": "/settings", "note": "requires admin login", "lens": "consistency"}], "uncovered_expected": []}, "findings": [{"id": "NP-d83941", "lens": "consistency", "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout", "expected": "One verb for the same action everywhere", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/consistency-order-verb.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-d14e24", "lens": "consistency", "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'", "expected": "One term per concept", "url": "http://localhost:3000/settings", "severity": "low", "area": "Settings", "steps": "", "screenshot": "screenshots/consistency-settings-title.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-e5500b", "lens": "friction", "what": "Address form forgets every field when validation fails", "expected": "Keep valid input; mark only the failing fields", "url": "http://localhost:3000/checkout", "severity": "high", "area": "Checkout", "steps": "", "screenshot": "screenshots/friction-address-form.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-979392", "lens": "friction", "what": "Empty cart shows a blank page with no call to action", "expected": "Empty state with 'Browse products' action", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/friction-empty-cart.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-5237c0", "lens": "friction", "what": "Analytics dashboard stuck on spinner for 30s, no feedback", "expected": "Loading skeleton or explicit error", "url": "http://localhost:3000/analytics", "severity": "medium", "area": "Analytics", "steps": "", "screenshot": "screenshots/friction-analytics-spinner.png", "proof_ok": true, "suspected_env_cause": true, "evidence_flag": "duplicate-image"}]}</script>
 <script>
 (function () {
   "use strict";
@@ -609,9 +617,27 @@
     }).length;
     var pct = findings.length ? Math.round((decided / findings.length) * 100) : 0;
     document.getElementById("progress-bar").style.width = pct + "%";
-    document.getElementById("progress-text").textContent =
-      decided + " of " + findings.length + " decided (" + pct + "%)";
+    var sev = { high: 0, medium: 0, low: 0 };
+    findings.forEach(function (f) { sev[f.severity] = (sev[f.severity] || 0) + 1; });
+    document.getElementById("progress-text").innerHTML =
+      decided + " of " + findings.length + " decided (" + pct + "%)" +
+      ' &nbsp;·&nbsp; <span class="chip sev-high">' + sev.high + ' high</span>' +
+      ' <span class="chip sev-medium">' + sev.medium + ' medium</span>' +
+      ' <span class="chip sev-low">' + sev.low + ' low</span>';
   }
+
+  // ---------- theme toggle ----------
+  var themeBtn = document.getElementById("btn-theme");
+  function paintTheme() {
+    themeBtn.textContent = document.documentElement.dataset.theme === "light" ? "🌙" : "☀️";
+  }
+  themeBtn.addEventListener("click", function () {
+    var next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("nitpicky-theme", next); } catch (e) {}
+    paintTheme();
+  });
+  paintTheme();
 
   // ---------- filters ----------
   var filters = { lenses: {}, severity: "any", status: "any", q: "", envOnly: false };
