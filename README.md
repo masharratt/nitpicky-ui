@@ -29,7 +29,7 @@ explanation), and the export is a checklist an implementation team can execute.
 ## Install
 
 ```bash
-git clone https://github.com/masharratt/nitpicky.git ~/projects/nitpicky
+git clone https://github.com/masharratt/nitpicky-ui.git ~/projects/nitpicky
 ln -s ~/projects/nitpicky ~/.claude/skills/nitpicky
 ```
 
