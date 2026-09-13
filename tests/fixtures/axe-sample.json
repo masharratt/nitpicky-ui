@@ -1,0 +1,31 @@
+{
+  "url": "http://localhost:3000/signup",
+  "violations": [
+    {
+      "id": "label",
+      "impact": "critical",
+      "help": "Form elements must have labels",
+      "description": "Ensure every form element has a label",
+      "nodes": [
+        {"target": ["#email"]},
+        {"target": ["#name"]}
+      ]
+    },
+    {
+      "id": "color-contrast",
+      "impact": "moderate",
+      "help": "Elements must meet minimum color contrast ratio",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimums",
+      "nodes": [
+        {"target": [".hint-text"]}
+      ]
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": "minor",
+      "help": "Document must have one main landmark",
+      "description": "Ensure the document has at most one main landmark",
+      "nodes": []
+    }
+  ]
+}

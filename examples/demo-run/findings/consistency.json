@@ -1,0 +1,36 @@
+{
+  "lens": "consistency",
+  "coverage": [
+    {
+      "path": "/cart",
+      "status": "covered"
+    },
+    {
+      "path": "/checkout",
+      "status": "covered"
+    },
+    {
+      "path": "/settings",
+      "status": "skipped",
+      "note": "requires admin login"
+    }
+  ],
+  "findings": [
+    {
+      "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout",
+      "expected": "One verb for the same action everywhere",
+      "url": "http://localhost:3000/cart",
+      "severity": "medium",
+      "area": "Cart",
+      "screenshot": "screenshots/consistency-order-verb.png"
+    },
+    {
+      "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'",
+      "expected": "One term per concept",
+      "url": "http://localhost:3000/settings",
+      "severity": "low",
+      "area": "Settings",
+      "screenshot": "screenshots/consistency-settings-title.png"
+    }
+  ]
+}

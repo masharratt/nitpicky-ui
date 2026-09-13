@@ -1,13 +1,30 @@
 ---
 name: nitpicky
 description: "Pre-launch visual walkthrough of a full app: spawns parallel per-lens review agents (consistency, friction, verbose language, visual polish, accessibility) that screenshot every page and state, merges findings into a browser triage portal (fix / deny / defer with notes, autosaved to decisions.json on disk via a local server), and exports a hand-off checklist for the implementation team. Use when preparing an app for launch or human testing."
-version: 1.3.0
+version: 1.4.0
 tags: [review, ux, polish, launch-readiness, playwright, walkthrough, triage]
 status: dev
 category: review
 ---
 
 # Nitpicky
+
+## Standalone use (no agent, no Claude Code)
+
+The pipeline runs on any folder of findings JSON — from your own scripts, axe-core,
+Lighthouse, or another agent:
+
+```bash
+pipx install git+https://github.com/masharratt/nitpicky-ui.git
+nitpicky init . http://localhost:3000        # scaffold
+nitpicky import-axe axe.json --url http://localhost:3000 -o findings/axe.json
+nitpicky merge  --run-dir planning/nitpicky/<run-id>
+nitpicky review --run-dir planning/nitpicky/<run-id>   # triage portal
+nitpicky export --run-dir planning/nitpicky/<run-id>   # CHECKLIST.md
+```
+
+Contract for findings producers: `schema/lens-findings.schema.json`.
+Tour without any setup: `nitpicky review examples/demo-run`.
 
 ## Purpose
 
@@ -202,18 +219,26 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 | File | Purpose |
 |------|---------|
 | `SKILL.md` | This runbook |
-| `lib/new-run.sh` | Scaffold `<project>/planning/nitpicky/<run-id>/` |
-| `lib/merge-findings.py` | Validate + merge lens JSONs, assign stable ids, inline payload into review.html |
-| `lib/server.py` | Local portal server: serves the run dir, persists decision patches atomically to decisions.json, writes CHECKLIST.md on export |
-| `lib/export-checklist.py` | Checklist builder (shared with server) + CLI regeneration from any decisions file |
+| `src/nitpicky/` | Implementation package (merge, checklist, portal, scaffold, adapters, cli) |
+| `lib/new-run.sh` | Scaffold `<project>/planning/nitpicky/<run-id>/` (CLI: `nitpicky init`) |
+| `lib/merge-findings.py` | Shim → `nitpicky.cli merge` |
+| `lib/server.py` | Shim → portal server (`nitpicky review`) |
+| `lib/export-checklist.py` | Shim → `nitpicky.cli export` |
 | `lib/open-site.sh` | Open a URL or review.html in WSL2 (wslview / explorer.exe fallbacks) |
 | `lib/lenses.md` | Agent contract: thoroughness rules + the five lens definitions |
-| `lib/findings-schema.md` | Agent output schema |
-| `review/template.html` | Triage page template: dual mode (server API + draft queue, or file:// + localStorage) |
-| `tests/test-nitpicky.sh` | Unit + server tests: merge, id stability, validation, atomic writes, export, traversal |
+| `lib/findings-schema.md` | Agent output schema (human-readable; machine: `schema/lens-findings.schema.json`) |
+| `schema/lens-findings.schema.json` | Published JSON Schema for findings producers |
+| `adapters/` note | axe/Lighthouse converters live in the package: `nitpicky import-axe` / `import-lighthouse` |
+| `examples/demo-run/` | Complete pre-triaged example run |
+| `tests/test-nitpicky.sh` | Core suite: merge, id stability, validation, atomic writes, export, traversal |
+| `tests/test-cli-adapters.sh` | CLI, adapters, schema-examples validation |
 
 ## Version History
 
+- **1.4.0** (2026-09-13): Standalone release. `nitpicky` CLI (init/merge/review/
+  export), published findings JSON Schema, axe-core + Lighthouse adapters,
+  examples/demo-run, packaging (pipx-installable). Implementation packaged under
+  `src/nitpicky/`; `lib/` scripts kept as shims for skill-path compatibility.
 - **1.3.0** (2026-09-13): First live-run feedback incorporated (172-finding run):
   mandatory per-agent browser isolation + mechanical duplicate-evidence detection;
   data-path pre-flight; coverage manifest (coverage.expected + per-agent coverage

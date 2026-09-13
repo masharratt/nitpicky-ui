@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "decisions": {
+    "NP-d83941": {
+      "decision": "fix",
+      "explanation": "Money path; unify the verb"
+    },
+    "NP-e5500b": {
+      "decision": "fix",
+      "explanation": "Launch blocker for first purchase"
+    },
+    "NP-979392": {
+      "decision": "defer",
+      "explanation": "Design pass scheduled post-launch"
+    },
+    "NP-5237c0": {
+      "decision": "deny",
+      "explanation": "Known backend ticket, not an app defect"
+    },
+    "NP-d14e24": {
+      "decision": "fix"
+    }
+  }
+}

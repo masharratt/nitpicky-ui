@@ -1,0 +1,104 @@
+{
+  "run_id": "20260912-213704",
+  "app_url": "http://localhost:3000",
+  "generated": "2026-09-13T04:37:04+00:00",
+  "counts": {
+    "total": 5,
+    "by_lens": {
+      "consistency": 2,
+      "friction": 3
+    }
+  },
+  "env_summary": {
+    "suspected_env_findings": 1
+  },
+  "clusters": {},
+  "coverage": {
+    "expected": [],
+    "covered": [
+      "/cart",
+      "/checkout"
+    ],
+    "blocked": [],
+    "skipped": [
+      {
+        "path": "/settings",
+        "note": "requires admin login",
+        "lens": "consistency"
+      }
+    ],
+    "uncovered_expected": []
+  },
+  "findings": [
+    {
+      "id": "NP-d83941",
+      "lens": "consistency",
+      "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout",
+      "expected": "One verb for the same action everywhere",
+      "url": "http://localhost:3000/cart",
+      "severity": "medium",
+      "area": "Cart",
+      "steps": "",
+      "screenshot": "screenshots/consistency-order-verb.png",
+      "proof_ok": true,
+      "suspected_env_cause": false,
+      "evidence_flag": "duplicate-image"
+    },
+    {
+      "id": "NP-d14e24",
+      "lens": "consistency",
+      "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'",
+      "expected": "One term per concept",
+      "url": "http://localhost:3000/settings",
+      "severity": "low",
+      "area": "Settings",
+      "steps": "",
+      "screenshot": "screenshots/consistency-settings-title.png",
+      "proof_ok": true,
+      "suspected_env_cause": false,
+      "evidence_flag": "duplicate-image"
+    },
+    {
+      "id": "NP-e5500b",
+      "lens": "friction",
+      "what": "Address form forgets every field when validation fails",
+      "expected": "Keep valid input; mark only the failing fields",
+      "url": "http://localhost:3000/checkout",
+      "severity": "high",
+      "area": "Checkout",
+      "steps": "",
+      "screenshot": "screenshots/friction-address-form.png",
+      "proof_ok": true,
+      "suspected_env_cause": false,
+      "evidence_flag": "duplicate-image"
+    },
+    {
+      "id": "NP-979392",
+      "lens": "friction",
+      "what": "Empty cart shows a blank page with no call to action",
+      "expected": "Empty state with 'Browse products' action",
+      "url": "http://localhost:3000/cart",
+      "severity": "medium",
+      "area": "Cart",
+      "steps": "",
+      "screenshot": "screenshots/friction-empty-cart.png",
+      "proof_ok": true,
+      "suspected_env_cause": false,
+      "evidence_flag": "duplicate-image"
+    },
+    {
+      "id": "NP-5237c0",
+      "lens": "friction",
+      "what": "Analytics dashboard stuck on spinner for 30s, no feedback",
+      "expected": "Loading skeleton or explicit error",
+      "url": "http://localhost:3000/analytics",
+      "severity": "medium",
+      "area": "Analytics",
+      "steps": "",
+      "screenshot": "screenshots/friction-analytics-spinner.png",
+      "proof_ok": true,
+      "suspected_env_cause": true,
+      "evidence_flag": "duplicate-image"
+    }
+  ]
+}

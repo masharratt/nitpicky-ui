@@ -11,8 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run shellcheck on shell sources
-        run: |
-          shellcheck -x --severity=warning lib/*.sh tests/*.sh
+        run: shellcheck -x --severity=warning lib/*.sh tests/*.sh
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -20,5 +19,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run test suite
+      - name: Install package (editable)
+        run: pip install -e .
+      - name: CLI smoke
+        run: nitpicky --version
+      - name: Run core suite
         run: bash tests/test-nitpicky.sh
+      - name: Run CLI + adapter suite
+        run: bash tests/test-cli-adapters.sh
+      - name: Validate examples against published schema
+        run: |
+          pip install jsonschema
+          python3 - <<'EOF'
+          import json, glob
+          from jsonschema import validate
+          schema = json.load(open("schema/lens-findings.schema.json"))
+          for path in glob.glob("examples/demo-run/findings/*.json"):
+              validate(json.load(open(path)), schema)
+          print("examples validated against schema")
+          EOF

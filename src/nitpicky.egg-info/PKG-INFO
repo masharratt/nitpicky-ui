@@ -1,3 +1,14 @@
+Metadata-Version: 2.4
+Name: nitpicky
+Version: 1.4.0
+Summary: Pre-launch visual walkthrough: parallel lens agents find UI defects, a local portal to triage them, a checklist hand-off for the implementation team
+License: MIT
+Keywords: qa,accessibility,playwright,code-review,triage,claude
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 # nitpicky
 
 Pre-launch polish sweep for your UI: parallel review agents walk your entire running

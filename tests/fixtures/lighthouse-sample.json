@@ -1,0 +1,46 @@
+{
+  "finalDisplayedUrl": "http://localhost:3000/signup",
+  "audits": {
+    "image-alt": {
+      "id": "image-alt",
+      "title": "Image elements have [alt] attributes",
+      "description": "Informative elements should have short, descriptive alternative text. Decorative elements can be ignored with an empty alt attribute. Learn more.",
+      "score": 0,
+      "scoreDisplayMode": "binary",
+      "displayValue": "2 elements found"
+    },
+    "aria-valid-attr-value": {
+      "id": "aria-valid-attr-value",
+      "title": "[aria-*] attributes have valid values",
+      "description": "Assistive technologies, like screen readers, can't use [aria-*] attributes with invalid values. Learn more.",
+      "score": 0.5,
+      "scoreDisplayMode": "binary",
+      "displayValue": "1 aria attribute invalid"
+    },
+    "button-type": {
+      "id": "button-type",
+      "title": "Buttons have an accessible name",
+      "description": "When a button doesn't have an accessible name, screen readers announce it as button, making it unusable for users who rely on screen readers. Learn more.",
+      "score": 1,
+      "scoreDisplayMode": "binary"
+    },
+    "meta-viewport": {
+      "id": "meta-viewport",
+      "title": "Has a `<meta name=\"viewport\">` tag with `width` or `initial-scale`",
+      "description": "User zoom is disabled by a missing viewport tag. Learn more.",
+      "score": null,
+      "scoreDisplayMode": "notApplicable"
+    }
+  },
+  "categories": {
+    "accessibility": {
+      "id": "accessibility",
+      "auditRefs": [
+        {"id": "image-alt", "weight": 5},
+        {"id": "aria-valid-attr-value", "weight": 3},
+        {"id": "button-type", "weight": 5},
+        {"id": "meta-viewport", "weight": 0}
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "lens": "friction",
+  "coverage": [
+    {
+      "path": "/cart",
+      "status": "covered"
+    },
+    {
+      "path": "/checkout",
+      "status": "covered"
+    }
+  ],
+  "findings": [
+    {
+      "what": "Address form forgets every field when validation fails",
+      "expected": "Keep valid input; mark only the failing fields",
+      "url": "http://localhost:3000/checkout",
+      "severity": "high",
+      "area": "Checkout",
+      "screenshot": "screenshots/friction-address-form.png"
+    },
+    {
+      "what": "Empty cart shows a blank page with no call to action",
+      "expected": "Empty state with 'Browse products' action",
+      "url": "http://localhost:3000/cart",
+      "severity": "medium",
+      "area": "Cart",
+      "screenshot": "screenshots/friction-empty-cart.png"
+    },
+    {
+      "what": "Analytics dashboard stuck on spinner for 30s, no feedback",
+      "expected": "Loading skeleton or explicit error",
+      "url": "http://localhost:3000/analytics",
+      "severity": "medium",
+      "area": "Analytics",
+      "screenshot": "screenshots/friction-analytics-spinner.png",
+      "suspected_env_cause": true
+    }
+  ]
+}
