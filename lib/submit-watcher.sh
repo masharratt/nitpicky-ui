@@ -22,7 +22,7 @@ if [ -f "$SUBMISSIONS" ]; then
 fi
 
 emit_new() {
-  local total now_line
+  local total
   total="$(grep -c '' "$SUBMISSIONS" 2>/dev/null || echo 0)"
   if [ "$total" -gt "$SEEN" ]; then
     tail -n +"$((SEEN + 1))" "$SUBMISSIONS"
