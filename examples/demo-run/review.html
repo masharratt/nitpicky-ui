@@ -114,6 +114,7 @@
   .chip.sev-medium { background: var(--defer-soft); color: var(--medium); }
   .chip.lens { background: var(--accent-soft); color: var(--accent); }
   .chip.env { background: var(--defer-soft); color: var(--defer); }
+  .chip.mem { background: var(--surface-2); color: var(--text-dim); border: 1px dashed var(--line); }
   .card-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .65fr); gap: 24px; align-items: start; }
   .what { margin: 0 0 18px; font-size: 17px; font-weight: 600; line-height: 1.55; letter-spacing: -.25px; overflow-wrap: anywhere; }
   .expected { font-size: 13px; margin: 0 0 18px; color: var(--text-dim); overflow-wrap: anywhere; }
@@ -202,6 +203,7 @@
     <div class="head-actions">
       <span id="save-status" role="status" aria-live="polite"></span>
       <button id="btn-retry" hidden>Retry save</button>
+      <button id="btn-submit" hidden title="Hand new or changed decisions to the agent session watching this run">Submit to agent</button>
       <button id="btn-theme" aria-label="Switch to light theme"></button>
       <button id="btn-export" class="primary">Export checklist ↗</button>
     </div>
@@ -215,6 +217,7 @@
       <div class="filter-group"><label class="eyebrow" for="f-severity">Priority</label><select id="f-severity"><option value="any">All priorities</option><option value="high">High priority</option><option value="medium">Medium priority</option><option value="low">Low priority</option></select></div>
       <div class="filter-group"><label class="eyebrow" for="f-status">Decision</label><select id="f-status"><option value="any">All decisions</option><option value="undecided">Awaiting decision</option><option value="fix">Fix</option><option value="defer">Defer</option><option value="deny">Deny</option></select></div>
       <div class="filter-group"><button id="f-env" aria-pressed="false" title="Show findings that may be caused by the environment">Possible environment issues</button></div>
+      <div class="filter-group"><button id="f-prior" aria-pressed="false" title="Findings decided in an earlier run are hidden unless this is on">Previously decided</button></div>
     </div>
     <div class="sidebar-help"><span class="eyebrow">Make the call</span><p><b>Fix</b> · Include in the checklist.</p><p><b>Defer</b> · Keep for later.</p><p><b>Deny</b> · Dismiss the finding.</p><p>Your notes guide implementation. Click a selected decision to clear it.</p></div>
   </aside>
@@ -265,7 +268,7 @@
   </div>
 </div>
 
-<script type="application/json" id="nitpicky-payload">{"run_id": "20260912-213704", "app_url": "http://localhost:3000", "generated": "2026-09-13T04:56:16+00:00", "counts": {"total": 5, "by_lens": {"consistency": 2, "friction": 3}}, "env_summary": {"suspected_env_findings": 1}, "clusters": {}, "coverage": {"expected": [], "covered": ["/cart", "/checkout"], "blocked": [], "skipped": [{"path": "/settings", "note": "requires admin login", "lens": "consistency"}], "uncovered_expected": []}, "findings": [{"id": "NP-d83941", "lens": "consistency", "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout", "expected": "One verb for the same action everywhere", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/consistency-order-verb.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-d14e24", "lens": "consistency", "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'", "expected": "One term per concept", "url": "http://localhost:3000/settings", "severity": "low", "area": "Settings", "steps": "", "screenshot": "screenshots/consistency-settings-title.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-e5500b", "lens": "friction", "what": "Address form forgets every field when validation fails", "expected": "Keep valid input; mark only the failing fields", "url": "http://localhost:3000/checkout", "severity": "high", "area": "Checkout", "steps": "", "screenshot": "screenshots/friction-address-form.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-979392", "lens": "friction", "what": "Empty cart shows a blank page with no call to action", "expected": "Empty state with 'Browse products' action", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/friction-empty-cart.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-5237c0", "lens": "friction", "what": "Analytics dashboard stuck on spinner for 30s, no feedback", "expected": "Loading skeleton or explicit error", "url": "http://localhost:3000/analytics", "severity": "medium", "area": "Analytics", "steps": "", "screenshot": "screenshots/friction-analytics-spinner.png", "proof_ok": true, "suspected_env_cause": true, "evidence_flag": "duplicate-image"}]}</script>
+<script type="application/json" id="nitpicky-payload">{"run_id": "20260912-213704", "app_url": "http://localhost:3000", "generated": "2026-09-14T14:22:33+00:00", "counts": {"total": 5, "by_lens": {"consistency": 2, "friction": 3}}, "env_summary": {"suspected_env_findings": 1}, "clusters": {}, "memory_summary": {"denied": 0, "deferred": 0, "fixed": 0}, "coverage": {"expected": [], "covered": ["/cart", "/checkout"], "blocked": [], "skipped": [{"path": "/settings", "note": "requires admin login", "lens": "consistency"}], "uncovered_expected": []}, "findings": [{"id": "NP-d83941", "lens": "consistency", "what": "Primary button says 'Submit order' on cart, 'Place order' on checkout", "expected": "One verb for the same action everywhere", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/consistency-order-verb.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-d14e24", "lens": "consistency", "what": "Settings page title is 'Admin Panel', everywhere else uses 'Settings'", "expected": "One term per concept", "url": "http://localhost:3000/settings", "severity": "low", "area": "Settings", "steps": "", "screenshot": "screenshots/consistency-settings-title.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-e5500b", "lens": "friction", "what": "Address form forgets every field when validation fails", "expected": "Keep valid input; mark only the failing fields", "url": "http://localhost:3000/checkout", "severity": "high", "area": "Checkout", "steps": "", "screenshot": "screenshots/friction-address-form.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-979392", "lens": "friction", "what": "Empty cart shows a blank page with no call to action", "expected": "Empty state with 'Browse products' action", "url": "http://localhost:3000/cart", "severity": "medium", "area": "Cart", "steps": "", "screenshot": "screenshots/friction-empty-cart.png", "proof_ok": true, "suspected_env_cause": false, "evidence_flag": "duplicate-image"}, {"id": "NP-5237c0", "lens": "friction", "what": "Analytics dashboard stuck on spinner for 30s, no feedback", "expected": "Loading skeleton or explicit error", "url": "http://localhost:3000/analytics", "severity": "medium", "area": "Analytics", "steps": "", "screenshot": "screenshots/friction-analytics-spinner.png", "proof_ok": true, "suspected_env_cause": true, "evidence_flag": "duplicate-image"}]}</script>
 <script>
 (function () {
   "use strict";
@@ -331,11 +334,54 @@
       el.className = "";
       retry.hidden = true;
     }
+    if (SERVER_MODE) refreshSubmitStatus();
   }
 
   document.getElementById("btn-retry").addEventListener("click", function () {
     saveFailed = false; lastError = null; updateStatus();
     Object.keys(drafts).forEach(function (id) { enqueuePost(id, drafts[id]); });
+  });
+
+  // ---------- submit to agent (server mode only) ----------
+  // The reviewing session arms lib/submit-watcher.sh on this run dir; each
+  // Submit emits an event with only new-or-changed decisions, and the
+  // watcher's notification wakes that session.
+  var submitBtn = document.getElementById("btn-submit");
+  var lastSubmitCheck = 0;
+  function refreshSubmitStatus() {
+    if (!SERVER_MODE) return;
+    var now = Date.now();
+    if (now - lastSubmitCheck < 3000) return;   // updateStatus fires often; throttle
+    lastSubmitCheck = now;
+    fetch("/api/submit/status").then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.pending) return;
+      submitBtn.hidden = false;
+      submitBtn.disabled = j.pending.length === 0;
+      submitBtn.textContent = j.pending.length
+        ? "Submit to agent (" + j.pending.length + " new)"
+        : "Submitted ✓";
+    }).catch(function () { /* server unreachable; Retry path covers saves */ });
+  }
+  submitBtn.addEventListener("click", function () {
+    submitBtn.disabled = true;
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      var el = document.getElementById("save-status");
+      if (j.ok) {
+        el.textContent = "Submitted " + j.submitted.length + " new/changed to agent · "
+          + j.skipped + " unchanged skipped";
+        el.className = "ok";
+        refreshSubmitStatus();
+      } else {
+        submitBtn.disabled = false;
+      }
+    }).catch(function () {
+      submitBtn.disabled = false;
+      saveFailed = true; lastError = "server unreachable"; updateStatus();
+    });
   });
 
   // ---------- persistence ----------
@@ -478,6 +524,7 @@
     chip("sev-" + f.severity, f.severity);
     if (f.area) chip("", f.area);
     if (f.suspected_env_cause) chip("env", "env?");
+    if (f.memory) chip("mem", "previously " + (f.memory.decision === "deny" ? "denied" : f.memory.decision === "defer" ? "deferred" : "fixed"));
     card.appendChild(head);
 
     if (f.cluster_size > 1) {
@@ -664,12 +711,13 @@
   paintTheme();
 
   // ---------- filters ----------
-  var filters = { lenses: {}, severity: "any", status: "any", q: "", envOnly: false };
+  var filters = { lenses: {}, severity: "any", status: "any", q: "", envOnly: false, showPrior: false };
   findings.forEach(function (f) { filters.lenses[f.lens] = true; });
 
   function matches(f) {
     if (!filters.lenses[f.lens]) return false;
     if (filters.envOnly && !f.suspected_env_cause) return false;
+    if (!filters.showPrior && f.memory && f.memory.decision !== "fix") return false;
     if (filters.severity !== "any" && f.severity !== filters.severity) return false;
     var d = decisions[f.id] && decisions[f.id].decision;
     if (filters.status !== "any") {
@@ -726,6 +774,22 @@
     filters.envOnly = !filters.envOnly;
     envBtn.classList.toggle("on", filters.envOnly);
     envBtn.setAttribute("aria-pressed", String(filters.envOnly));
+    applyFilters();
+  });
+
+  var priorBtn = document.getElementById("f-prior");
+  var priorCount = findings.filter(function (f) {
+    return f.memory && (f.memory.decision === "deny" || f.memory.decision === "defer");
+  }).length;
+  if (priorCount) {
+    priorBtn.textContent = "Show " + priorCount + " previously decided";
+    priorBtn.setAttribute("aria-pressed", "false");
+  } else {
+    priorBtn.hidden = true;
+  }
+  priorBtn.addEventListener("click", function () {
+    filters.showPrior = !filters.showPrior;
+    priorBtn.setAttribute("aria-pressed", String(filters.showPrior));
     applyFilters();
   });
 
