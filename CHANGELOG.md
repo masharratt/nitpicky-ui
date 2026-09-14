@@ -2,6 +2,22 @@
 
 All notable changes to nitpicky.
 
+## 1.5.0 — 2026-09-14
+
+Submit-to-agent: the portal can now wake the reviewing session.
+
+- **Submit to agent** button (server mode): hands only new-or-changed decisions
+  to the session watching the run — per-finding fingerprints
+  (`submit-state.json`) make repeated clicks idempotent, changed decisions
+  resubmit, unchanged ones are skipped and counted.
+- Each Submit appends an event to `submissions.jsonl`.
+- **`lib/submit-watcher.sh`**: session-side wake-up — `--once` as a background
+  task (completion notification wakes the session), `--follow` for per-event
+  streaming.
+- `GET /api/submit/status` reports the pending-new count.
+
+## 1.4.0 — 2026-09-13
+
 ## 1.4.0 — 2026-09-13
 
 Standalone product release: the pipeline no longer requires Claude Code.

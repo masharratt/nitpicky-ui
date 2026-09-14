@@ -202,6 +202,7 @@
     <div class="head-actions">
       <span id="save-status" role="status" aria-live="polite"></span>
       <button id="btn-retry" hidden>Retry save</button>
+      <button id="btn-submit" hidden title="Hand new or changed decisions to the agent session watching this run">Submit to agent</button>
       <button id="btn-theme" aria-label="Switch to light theme"></button>
       <button id="btn-export" class="primary">Export checklist ↗</button>
     </div>
@@ -331,11 +332,54 @@
       el.className = "";
       retry.hidden = true;
     }
+    if (SERVER_MODE) refreshSubmitStatus();
   }
 
   document.getElementById("btn-retry").addEventListener("click", function () {
     saveFailed = false; lastError = null; updateStatus();
     Object.keys(drafts).forEach(function (id) { enqueuePost(id, drafts[id]); });
+  });
+
+  // ---------- submit to agent (server mode only) ----------
+  // The reviewing session arms lib/submit-watcher.sh on this run dir; each
+  // Submit emits an event with only new-or-changed decisions, and the
+  // watcher's notification wakes that session.
+  var submitBtn = document.getElementById("btn-submit");
+  var lastSubmitCheck = 0;
+  function refreshSubmitStatus() {
+    if (!SERVER_MODE) return;
+    var now = Date.now();
+    if (now - lastSubmitCheck < 3000) return;   // updateStatus fires often; throttle
+    lastSubmitCheck = now;
+    fetch("/api/submit/status").then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.pending) return;
+      submitBtn.hidden = false;
+      submitBtn.disabled = j.pending.length === 0;
+      submitBtn.textContent = j.pending.length
+        ? "Submit to agent (" + j.pending.length + " new)"
+        : "Submitted ✓";
+    }).catch(function () { /* server unreachable; Retry path covers saves */ });
+  }
+  submitBtn.addEventListener("click", function () {
+    submitBtn.disabled = true;
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      var el = document.getElementById("save-status");
+      if (j.ok) {
+        el.textContent = "Submitted " + j.submitted.length + " new/changed to agent · "
+          + j.skipped + " unchanged skipped";
+        el.className = "ok";
+        refreshSubmitStatus();
+      } else {
+        submitBtn.disabled = false;
+      }
+    }).catch(function () {
+      submitBtn.disabled = false;
+      saveFailed = true; lastError = "server unreachable"; updateStatus();
+    });
   });
 
   // ---------- persistence ----------

@@ -226,6 +226,32 @@ assert len(doc["decisions"]) == 3, doc["decisions"]
 EOF
 [ $? = 0 ] && ok || fail "T10 disk state missing all three decisions"
 
+# T10s: submit-to-agent — first submit takes all, resubmit skips, change resubmits
+SUB1="$(curl -s -X POST -H 'Content-Type: application/json' -H "Origin: $BASE" -d '{}' "$BASE/api/submit")"
+assert_contains "$SUB1" '"submitted": ["' "T10s first submit carries ids"
+N_SUBMITTED="$("$PY" -c "import json,sys;print(len(json.loads(sys.argv[1])['submitted']))" "$SUB1")"
+assert_eq "$N_SUBMITTED" "3" "T10s first submit takes all decided"
+[ -f "$RUN_S/submissions.jsonl" ] && ok || fail "T10s submissions.jsonl written"
+SUB2="$(curl -s -X POST -H 'Content-Type: application/json' -H "Origin: $BASE" -d '{}' "$BASE/api/submit")"
+assert_contains "$SUB2" '"submitted": []' "T10s resubmit skips unchanged"
+assert_contains "$SUB2" '"skipped": 3' "T10s resubmit counts skipped"
+api_post "/api/decision" "{\"id\":\"$SID2\",\"explanation\":\"changed note\"}" 200 "T10s changed note patch"
+SUB3="$(curl -s -X POST -H 'Content-Type: application/json' -H "Origin: $BASE" -d '{}' "$BASE/api/submit")"
+assert_contains "$SUB3" "\"$SID2\"" "T10s changed decision resubmitted"
+N_SUB3="$("$PY" -c "import json,sys;print(len(json.loads(sys.argv[1])['submitted']))" "$SUB3")"
+assert_eq "$N_SUB3" "1" "T10s only the changed one resubmits"
+
+# watcher: --once exits emitting the next submission after its start
+WATCH_OUT="$TMP/watch-out.txt"
+"$SKILL_DIR/lib/submit-watcher.sh" --once "$RUN_S" >"$WATCH_OUT" 2>&1 &
+WPID=$!
+api_post "/api/decision" "{\"id\":\"$SID3\",\"explanation\":\"watcher trigger\"}" 200 "T10w watcher trigger patch"
+curl -s -o /dev/null -X POST -H 'Content-Type: application/json' -H "Origin: $BASE" -d '{}' "$BASE/api/submit"
+for _ in $(seq 1 40); do [ -s "$WATCH_OUT" ] && break; sleep 0.2; done
+kill "$WPID" 2>/dev/null
+grep -q '"event": "submit"' "$WATCH_OUT" && ok || fail "T10w watcher emitted no event"
+grep -q "\"$SID3\"" "$WATCH_OUT" && ok || fail "T10w watcher event missing changed id"
+
 api_post "/api/export" '{}' 200 "T10 export endpoint"
 grep -q '^## Fix (1)' "$RUN_S/CHECKLIST.md" && ok || fail "T10 CHECKLIST.md missing Fix section"
 grep -q '^## Denied (1)' "$RUN_S/CHECKLIST.md" && ok || fail "T10 CHECKLIST.md missing Denied section"

@@ -1,7 +1,7 @@
 ---
 name: nitpicky
 description: "Pre-launch visual walkthrough of a full app: spawns parallel per-lens review agents (consistency, friction, verbose language, visual polish, accessibility) that screenshot every page and state, merges findings into a browser triage portal (fix / deny / defer with notes, autosaved to decisions.json on disk via a local server), and exports a hand-off checklist for the implementation team. Use when preparing an app for launch or human testing."
-version: 1.4.0
+version: 1.5.0
 tags: [review, ux, polish, launch-readiness, playwright, walkthrough, triage]
 status: dev
 category: review
@@ -121,14 +121,45 @@ let the user triage. Do not auto-export or auto-implement anything.
    chips narrow the list; "Next undecided" walks the queue; Bulk actions applies
    one decision to the whole filtered set (with confirm); likely cross-lens
    duplicates show an apply-to-cluster button; suspected-environment findings are
-   filterable; Export writes CHECKLIST.md straight into the run dir.
+   filterable; Export writes CHECKLIST.md straight into the run dir; **Submit to
+   agent** wakes you when they want the results acted on (see Submit-to-agent flow).
+7. **Arm the submit watcher** before walking away, so a Submit click wakes you:
+   ```bash
+   # background task; its completion notification is the wake-up
+   bash "$HOME/.claude/skills/nitpicky/lib/submit-watcher.sh" --once "$RUN_DIR"
+   ```
+   When it completes: `GET /api/submit/status` or read `submissions.jsonl`, run
+   `nitpicky export --run-dir "$RUN_DIR"`, summarize what the user decided, and ask
+   before implementing anything. Then re-arm the watcher for the next round
+   (partial submits are normal: each Submit hands over only new-or-changed decisions).
 7. **Hand-off.** When the user finishes triage (or asks mid-review), Export has
    written `$RUN_DIR/CHECKLIST.md`. Read `decisions.json` (or `GET /api/decisions`)
    to act on decisions yourself. Never parse CHECKLIST.md as the decision source;
    the JSON is authoritative. Keep explanations verbatim; a deny with an
    explanation may authorize an alternative change — do not collapse it to "no work".
 
-### Recovery runbook (user reports "Not saved")
+### Submit-to-agent flow
+
+`decisions.json` is the durable record; the Submit button is the *signal*. The
+portal diffs every decision against per-finding fingerprints
+(`submit-state.json`): **only new-or-changed decisions are submitted** — unchanged
+ones are skipped, so repeated clicks never re-ping the agent for the same content.
+Each click appends an event line to `submissions.jsonl`.
+
+Session-side wake-up options:
+
+| Mechanism | Command | Behavior |
+|-----------|---------|----------|
+| Background task (default) | `submit-watcher.sh --once <run-dir>` | exits on first new submission; the completion notification wakes the session; re-arm after handling |
+| Monitor-style | `submit-watcher.sh --follow <run-dir>` | emits one event per Submit, runs for the session |
+
+No watcher armed? Submit still records state and events; the user can fall back to
+Export, or the next session reads `GET /api/submit/status` to see what is pending.
+
+Default on wake: export + summarize + ask. Auto-implementing fix decisions without
+the user in the loop is not nitpicky's behavior.
+
+## Recovery runbook (user reports "Not saved")
 
 1. Read `$RUN_DIR/server.json` for the pid/port; check the process: `ps -p <pid>`,
    `tail "$RUN_DIR/server.log"`.
@@ -222,7 +253,8 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 | `src/nitpicky/` | Implementation package (merge, checklist, portal, scaffold, adapters, cli) |
 | `lib/new-run.sh` | Scaffold `<project>/planning/nitpicky/<run-id>/` (CLI: `nitpicky init`) |
 | `lib/merge-findings.py` | Shim → `nitpicky.cli merge` |
-| `lib/server.py` | Shim → portal server (`nitpicky review`) |
+| `lib/server.py` | Shim → portal server (`nitpicky review`); submit-to-agent diffing at `/api/submit` |
+| `lib/submit-watcher.sh` | Session-side wake-up: `--once` (background task) or `--follow` (per-event) on submissions.jsonl |
 | `lib/export-checklist.py` | Shim → `nitpicky.cli export` |
 | `lib/open-site.sh` | Open a URL or review.html in WSL2 (wslview / explorer.exe fallbacks) |
 | `lib/lenses.md` | Agent contract: thoroughness rules + the five lens definitions |
@@ -235,6 +267,12 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 
 ## Version History
 
+- **1.5.0** (2026-09-14): Submit-to-agent. Submit button on the portal hands only
+  new-or-changed decisions to the reviewing session (fingerprint diff in
+  `submit-state.json`, events in `submissions.jsonl`); `lib/submit-watcher.sh`
+  wakes the session (`--once` background task or `--follow` stream). `GET
+  /api/submit/status` reports pending count. Default wake behavior: export +
+  summarize + ask.
 - **1.4.0** (2026-09-13): Standalone release. `nitpicky` CLI (init/merge/review/
   export), published findings JSON Schema, axe-core + Lighthouse adapters,
   examples/demo-run, packaging (pipx-installable). Implementation packaged under

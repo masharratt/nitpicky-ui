@@ -11,6 +11,7 @@ A malformed existing decisions.json fails startup without replacing it.
 Exit codes: 0 = served until interrupt, 2 = bad inputs/state, 3 = port busy.
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -25,7 +26,9 @@ from nitpicky.checklist import build_markdown_from_state
 MAX_BODY = 65536
 MAX_EXPLANATION = 20000
 DECISION_VALUES = ("fix", "defer", "deny", "unreviewed")
-STATIC_ROOT_FILES = {"review.html", "findings.json", "run.json", "CHECKLIST.md"}
+SUBMITTED_DECISIONS = ("fix", "defer", "deny")
+STATIC_ROOT_FILES = {"review.html", "findings.json", "run.json", "CHECKLIST.md",
+                     "submit-state.json", "submissions.jsonl"}
 IMAGE_MIME = {
     ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
     ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml",
@@ -37,6 +40,11 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
 
 
+def decision_fingerprint(decision, explanation) -> str:
+    raw = f"{decision or ''}\x1f{explanation or ''}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+
+
 class PortalState:
     """Findings + decisions with serialized atomic persistence."""
 
@@ -44,6 +52,8 @@ class PortalState:
         self.run_dir = run_dir
         self.lock = threading.Lock()
         self.path = run_dir / "decisions.json"
+        self.submit_state_path = run_dir / "submit-state.json"
+        self.submissions_path = run_dir / "submissions.jsonl"
 
         meta = json.loads((run_dir / "run.json").read_text())
         findings_doc = json.loads((run_dir / "findings.json").read_text())
@@ -111,6 +121,54 @@ class PortalState:
             {"version": 1, "updated_at": now_iso(), "decisions": self.decisions},
             indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, self.path)
+
+    # ---------- submit-to-agent (new-or-changed decisions only) ----------
+    def submit_snapshot(self) -> dict:
+        with self.lock:
+            state = self._load_submit_state()
+            decided = {fid: rec for fid, rec in self.decisions.items()
+                       if rec.get("decision") in SUBMITTED_DECISIONS}
+            pending = [fid for fid, rec in decided.items()
+                       if state["fingerprints"].get(fid)
+                       != decision_fingerprint(rec.get("decision"), rec.get("explanation", ""))]
+            return {"run_id": self.run_id, "decided_total": len(decided),
+                    "pending": sorted(pending),
+                    "submitted_total": len(decided) - len(pending)}
+
+    def submit(self) -> dict:
+        with self.lock:
+            state = self._load_submit_state()
+            decided = {fid: rec for fid, rec in self.decisions.items()
+                       if rec.get("decision") in SUBMITTED_DECISIONS}
+            submitted = [fid for fid, rec in decided.items()
+                         if state["fingerprints"].get(fid)
+                         != decision_fingerprint(rec.get("decision"), rec.get("explanation", ""))]
+            if submitted:
+                for fid, rec in decided.items():
+                    state["fingerprints"][fid] = decision_fingerprint(
+                        rec.get("decision"), rec.get("explanation", ""))
+                state["last_submitted_at"] = now_iso()
+                tmp = self.submit_state_path.with_name(
+                    f"submit-state.json.tmp-{uuid.uuid4().hex}")
+                tmp.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
+                os.replace(tmp, self.submit_state_path)
+                with open(self.submissions_path, "a") as fh:
+                    fh.write(json.dumps({"event": "submit", "at": now_iso(),
+                                         "ids": submitted}) + "\n")
+            return {"submitted": sorted(submitted),
+                    "skipped": len(decided) - len(submitted),
+                    "decided_total": len(decided)}
+
+    def _load_submit_state(self) -> dict:
+        # caller holds the lock
+        if self.submit_state_path.exists():
+            try:
+                doc = json.loads(self.submit_state_path.read_text())
+                if isinstance(doc.get("fingerprints"), dict):
+                    return doc
+            except json.JSONDecodeError:
+                pass  # malformed submit state = nothing submitted yet; decisions.json untouched
+        return {"fingerprints": {}, "last_submitted_at": None}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -187,6 +245,8 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/api/decisions":
             self._json(200, self.state.snapshot())
+        elif path == "/api/submit/status":
+            self._json(200, self.state.submit_snapshot())
         elif path == "/api/health":
             snap = self.state.snapshot()
             decided = sum(1 for rec in snap["decisions"].values()
@@ -226,6 +286,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self._json(200, {"ok": True, "id": body["id"],
                              "record": record, "clientTs": body.get("clientTs")})
+        elif self.path.split("?", 1)[0] == "/api/submit":
+            result = self.state.submit()
+            self._json(200, {"ok": True, **result})
         elif self.path.split("?", 1)[0] == "/api/export":
             snap = self.state.snapshot()
             text, counts, undecided = build_markdown_from_state(
