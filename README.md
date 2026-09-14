@@ -11,6 +11,14 @@ the export is a checklist your implementation team can execute.
 Works with **any UI that can be screenshotted**. The triage portal works with
 **any tool that can emit findings JSON** (axe-core and Lighthouse adapters included).
 
+## What nitpicky is not
+
+Nitpicky is not a UI design system, component library, or style guide, and it has
+no opinions about how your app should look. Its whole purpose is to be nitpicky
+about **what is already built**: the inconsistencies, friction, verbose copy,
+misalignments, and accessibility gaps that slip past a build. Bring your own design
+decisions; nitpicky finds where the implementation drifts from them.
+
 ## How it works
 
 ```
@@ -68,6 +76,18 @@ nitpicky merge  --run-dir planning/nitpicky/<run-id>
 nitpicky review --run-dir planning/nitpicky/<run-id>   # triage; decisions autosave
 nitpicky export --run-dir planning/nitpicky/<run-id>   # writes CHECKLIST.md
 ```
+
+## Run it more than once
+
+One pass is a snapshot, not a verdict. Run nitpicky repeatedly, especially:
+
+- after each fix batch, to confirm the fixes and catch what they touched
+- at different app states: empty data, populated data, different roles
+- late in the cycle, when features stopped moving and polish is the work
+
+Reviewers surface different things on every pass; repeated runs converge on the
+defects that actually matter. Decisions are scoped to a run, so every triage
+starts clean.
 
 ## Decision dashboard
 
