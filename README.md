@@ -89,6 +89,12 @@ Reviewers surface different things on every pass; repeated runs converge on the
 defects that actually matter. Decisions are scoped to a run, so every triage
 starts clean.
 
+Cross-run memory keeps the repeats cheap: decisions you record (fix, defer, or
+deny, with your notes) are remembered per app in `planning/nitpicky/memory.json`.
+Later runs match new findings against that history, so something you already
+denied or explained is annotated and hidden by default instead of landing in
+your queue again.
+
 ## Decision dashboard
 
 The review workspace has a filter sidebar, clickable decision totals, searchable

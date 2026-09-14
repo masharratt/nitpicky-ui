@@ -35,7 +35,10 @@ def main(argv: list | None = None) -> int:
                           help="open the review page in the browser")
 
     p_export = sub.add_parser("export", help="write CHECKLIST.md from saved decisions")
-    p_export.add_argument("run_dir")
+    p_export.add_argument("run_dir_pos", nargs="?", default=None,
+                          help="run directory (positional form)")
+    p_export.add_argument("--run-dir", dest="run_dir_opt", default=None,
+                          help="run directory (flag form, mirrors merge)")
     p_export.add_argument("--decisions", default=None,
                           help="decisions JSON file (default: <run-dir>/decisions.json)")
     p_export.add_argument("-o", "--out", default=None)
@@ -69,9 +72,13 @@ def main(argv: list | None = None) -> int:
         return portal.main(argv)
     if args.cmd == "export":
         from nitpicky import checklist
-        return checklist.main(["--run-dir", args.run_dir,
+        run_dir = args.run_dir_opt or args.run_dir_pos
+        if not run_dir:
+            sys.stderr.write("nitpicky export: a run directory is required\n")
+            return 2
+        return checklist.main(["--run-dir", run_dir,
                                "--decisions", args.decisions
-                               or str(Path(args.run_dir) / "decisions.json"),
+                               or str(Path(run_dir) / "decisions.json"),
                                *(["-o", args.out] if args.out else [])])
     if args.cmd == "import-axe":
         from nitpicky.adapters import axe

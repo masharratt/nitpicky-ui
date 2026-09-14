@@ -2,6 +2,18 @@
 
 All notable changes to nitpicky.
 
+## 1.6.0 — 2026-09-14
+
+Cross-run decision memory: repeated runs stop re-flagging what you already settled.
+
+- Decisions recorded per app on export/submit to `planning/nitpicky/memory.json`
+  (route + finding text + decision + your explanation).
+- Merge matches new findings against memory (route + token overlap, same rule as
+  clustering) and annotates matches; run summary names the counts.
+- Portal hides previously denied/deferred findings by default with a
+  "Show N previously decided" toggle; previously fixed findings stay visible with
+  an annotation (a re-report after a fix may be a regression signal).
+
 ## 1.5.0 — 2026-09-14
 
 Submit-to-agent: the portal can now wake the reviewing session.

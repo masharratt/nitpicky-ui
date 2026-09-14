@@ -22,6 +22,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from nitpicky.checklist import build_markdown_from_state
+from nitpicky.memory import record as record_memory
 
 MAX_BODY = 65536
 MAX_EXPLANATION = 20000
@@ -297,6 +298,8 @@ class Handler(BaseHTTPRequestHandler):
                 redactions=self.state.redactions)
             out = self.state.run_dir / "CHECKLIST.md"
             out.write_text(text)
+            record_memory(self.state.run_dir, snap["decisions"],
+                          _findings_by_id(self.state))
             self._json(200, {"ok": True, "path": str(out),
                              "counts": counts, "undecided": undecided})
         else:

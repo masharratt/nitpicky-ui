@@ -26,11 +26,11 @@ Exit codes: 0 = merged (warnings named in output), 1 = schema/parse errors,
 import argparse
 import hashlib
 import json
-import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from nitpicky.memory import load_entries, match_for
+from nitpicky.textutil import CLUSTER_JACCARD, jaccard, norm_tokens, route_of
 
 REQUIRED = ("what", "expected", "url", "screenshot")
 SEVERITIES = ("high", "medium", "low")
@@ -51,23 +51,6 @@ def scrub(text, redactions):
         if secret:
             text = text.replace(secret, "[REDACTED]")
     return text
-
-
-def norm_tokens(text: str) -> frozenset:
-    return frozenset(re.findall(r"[a-z0-9]+", text.lower()))
-
-
-def jaccard(a: frozenset, b: frozenset) -> float:
-    if not a or not b:
-        return 0.0
-    return len(a & b) / len(a | b)
-
-
-def route_of(url: str) -> str:
-    try:
-        return urlparse(url).path or "/"
-    except Exception:
-        return "/"
 
 
 def assign_clusters(findings):
@@ -252,6 +235,17 @@ def main(argv=None) -> int:
     dup_evidence = detect_duplicate_evidence(run_dir, findings, redactions)
     coverage = aggregate_coverage(run_meta, lens_docs)
 
+    # cross-run memory: annotate findings already decided in an earlier run
+    memory_entries = load_entries(run_dir)
+    memory_counts = {"denied": 0, "deferred": 0, "fixed": 0}
+    for f in findings:
+        entry = match_for(f, memory_entries)
+        if entry and entry.get("decision") in ("deny", "defer", "fix"):
+            f["memory"] = {"decision": entry["decision"],
+                           "explanation": entry.get("explanation", "")}
+            memory_counts[{"deny": "denied", "defer": "deferred",
+                           "fix": "fixed"}[entry["decision"]]] += 1
+
     env_count = sum(1 for f in findings if f["suspected_env_cause"])
     doc = {
         "run_id": run_meta["run_id"],
@@ -264,6 +258,7 @@ def main(argv=None) -> int:
         },
         "env_summary": {"suspected_env_findings": env_count},
         "clusters": clusters,
+        "memory_summary": memory_counts,
         "coverage": coverage,
         "findings": findings,
     }
@@ -284,6 +279,11 @@ def main(argv=None) -> int:
     lens_summary = " ".join(f"{l}={n}" for l, n in by_lens.items())
     print(f"nitpicky-merge: merged {len(findings)} findings ({lens_summary}) "
           f"from {files_read} lens files -> {out}")
+    if any(memory_counts.values()):
+        print(f"nitpicky-merge: memory: previously-denied={memory_counts['denied']} "
+              f"previously-deferred={memory_counts['deferred']} "
+              f"previously-fixed={memory_counts['fixed']} "
+              f"(denied/deferred are hidden by default in the portal)")
     print(f"nitpicky-merge: run-health: suspected-env={env_count} "
           f"clusters={len(clusters)} duplicate-evidence-groups={len(dup_evidence)} "
           f"coverage: covered={len(coverage['covered'])} blocked={len(coverage['blocked'])} "

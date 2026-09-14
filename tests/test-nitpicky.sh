@@ -256,6 +256,35 @@ api_post "/api/export" '{}' 200 "T10 export endpoint"
 grep -q '^## Fix (1)' "$RUN_S/CHECKLIST.md" && ok || fail "T10 CHECKLIST.md missing Fix section"
 grep -q '^## Denied (1)' "$RUN_S/CHECKLIST.md" && ok || fail "T10 CHECKLIST.md missing Denied section"
 
+# T10m: export records cross-run memory; a sibling run's matching finding is annotated
+MEM_FILE="$TMP/srv-proj/planning/nitpicky/memory.json"
+[ -f "$MEM_FILE" ] && ok || fail "T10m memory.json not recorded on export"
+"$PY" - "$MEM_FILE" <<'EOF'
+import json, sys
+entries = json.load(open(sys.argv[1])).get("entries", [])
+assert len(entries) == 3, entries
+assert {e["decision"] for e in entries} == {"fix", "defer", "deny"}, entries
+assert all(e.get("tokens") and e.get("route") for e in entries)
+EOF
+[ $? = 0 ] && ok || fail "T10m memory entries malformed"
+RUN_M="$("$SKILL_DIR/lib/new-run.sh" "$TMP/srv-proj" 'http://localhost:3000')"
+"$PY" -c "import base64,pathlib;(pathlib.Path('$RUN_M/screenshots')/'f1.png').write_bytes(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='))"
+write_lens "$RUN_M" friction "[{\"what\": \"Finding two what\", \"expected\": \"Finding two expected\", \"url\": \"http://app.test/cart\", \"severity\": \"medium\", \"screenshot\": \"screenshots/f1.png\"},{\"what\": \"Finding nine what\", \"expected\": \"never decided before\", \"url\": \"http://app.test/cart\", \"severity\": \"low\", \"screenshot\": \"screenshots/f1.png\"}]"
+MERGE_M="$("$PY" "$SKILL_DIR/lib/merge-findings.py" --run-dir "$RUN_M" 2>&1)"
+assert_contains "$MERGE_M" "previously-denied=1" "T10m memory summary names denied match"
+"$PY" - "$RUN_M" <<'EOF'
+import json, sys
+d = json.load(open(sys.argv[1] + "/findings.json"))
+mem = [(f["what"], f["memory"]) for f in d["findings"] if f.get("memory")]
+assert len(mem) == 1, mem
+assert mem[0][0] == "Finding two what", mem       # only the same-defect finding matches
+assert mem[0][1]["decision"] == "deny", mem
+assert mem[0][1]["explanation"] == "watcher trigger", mem
+assert "memory_summary" in d and d["memory_summary"]["denied"] == 1
+assert d["findings"][1].get("memory") is None, "unrelated finding must not match"
+EOF
+[ $? = 0 ] && ok || fail "T10m matching finding not annotated (or false positive)"
+
 api_get_code "/screenshots/c1.png" 200 "T10 screenshot served"
 CODE="$(curl -s -o /dev/null -w '%{http_code}' --path-as-is "$BASE/screenshots/../findings.json")"
 assert_eq "$CODE" "404" "T10 path traversal blocked"

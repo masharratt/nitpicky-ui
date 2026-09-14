@@ -18,6 +18,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from nitpicky.memory import record as record_memory
+
 SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 DECISIONS = ("fix", "defer", "deny")
 
@@ -127,6 +129,7 @@ def main(argv=None) -> int:
         decisions = decisions["decisions"]
 
     findings_by_id = {f["id"]: f for f in findings_doc.get("findings", [])}
+    record_memory(run_dir, decisions, findings_by_id)
     redactions = []
     run_meta_path = run_dir / "run.json"
     if run_meta_path.is_file():

@@ -1,7 +1,7 @@
 ---
 name: nitpicky
 description: "Pre-launch visual walkthrough of a full app: spawns parallel per-lens review agents (consistency, friction, verbose language, visual polish, accessibility) that screenshot every page and state, merges findings into a browser triage portal (fix / deny / defer with notes, autosaved to decisions.json on disk via a local server), and exports a hand-off checklist for the implementation team. Use when preparing an app for launch or human testing."
-version: 1.5.0
+version: 1.6.0
 tags: [review, ux, polish, launch-readiness, playwright, walkthrough, triage]
 status: dev
 category: review
@@ -267,6 +267,11 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 
 ## Version History
 
+- **1.6.0** (2026-09-14): Cross-run decision memory. Export/submit records
+  decided findings (fix/defer/deny + notes) per app in
+  `planning/nitpicky/memory.json`; later runs match findings against it
+  (route + token overlap) and annotate them `memory`; the portal hides
+  previously denied/deferred findings by default behind a show toggle.
 - **1.5.0** (2026-09-14): Submit-to-agent. Submit button on the portal hands only
   new-or-changed decisions to the reviewing session (fingerprint diff in
   `submit-state.json`, events in `submissions.jsonl`); `lib/submit-watcher.sh`

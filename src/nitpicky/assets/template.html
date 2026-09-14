@@ -114,6 +114,7 @@
   .chip.sev-medium { background: var(--defer-soft); color: var(--medium); }
   .chip.lens { background: var(--accent-soft); color: var(--accent); }
   .chip.env { background: var(--defer-soft); color: var(--defer); }
+  .chip.mem { background: var(--surface-2); color: var(--text-dim); border: 1px dashed var(--line); }
   .card-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .65fr); gap: 24px; align-items: start; }
   .what { margin: 0 0 18px; font-size: 17px; font-weight: 600; line-height: 1.55; letter-spacing: -.25px; overflow-wrap: anywhere; }
   .expected { font-size: 13px; margin: 0 0 18px; color: var(--text-dim); overflow-wrap: anywhere; }
@@ -216,6 +217,7 @@
       <div class="filter-group"><label class="eyebrow" for="f-severity">Priority</label><select id="f-severity"><option value="any">All priorities</option><option value="high">High priority</option><option value="medium">Medium priority</option><option value="low">Low priority</option></select></div>
       <div class="filter-group"><label class="eyebrow" for="f-status">Decision</label><select id="f-status"><option value="any">All decisions</option><option value="undecided">Awaiting decision</option><option value="fix">Fix</option><option value="defer">Defer</option><option value="deny">Deny</option></select></div>
       <div class="filter-group"><button id="f-env" aria-pressed="false" title="Show findings that may be caused by the environment">Possible environment issues</button></div>
+      <div class="filter-group"><button id="f-prior" aria-pressed="false" title="Findings decided in an earlier run are hidden unless this is on">Previously decided</button></div>
     </div>
     <div class="sidebar-help"><span class="eyebrow">Make the call</span><p><b>Fix</b> · Include in the checklist.</p><p><b>Defer</b> · Keep for later.</p><p><b>Deny</b> · Dismiss the finding.</p><p>Your notes guide implementation. Click a selected decision to clear it.</p></div>
   </aside>
@@ -522,6 +524,7 @@
     chip("sev-" + f.severity, f.severity);
     if (f.area) chip("", f.area);
     if (f.suspected_env_cause) chip("env", "env?");
+    if (f.memory) chip("mem", "previously " + (f.memory.decision === "deny" ? "denied" : f.memory.decision === "defer" ? "deferred" : "fixed"));
     card.appendChild(head);
 
     if (f.cluster_size > 1) {
@@ -708,12 +711,13 @@
   paintTheme();
 
   // ---------- filters ----------
-  var filters = { lenses: {}, severity: "any", status: "any", q: "", envOnly: false };
+  var filters = { lenses: {}, severity: "any", status: "any", q: "", envOnly: false, showPrior: false };
   findings.forEach(function (f) { filters.lenses[f.lens] = true; });
 
   function matches(f) {
     if (!filters.lenses[f.lens]) return false;
     if (filters.envOnly && !f.suspected_env_cause) return false;
+    if (!filters.showPrior && f.memory && f.memory.decision !== "fix") return false;
     if (filters.severity !== "any" && f.severity !== filters.severity) return false;
     var d = decisions[f.id] && decisions[f.id].decision;
     if (filters.status !== "any") {
@@ -770,6 +774,22 @@
     filters.envOnly = !filters.envOnly;
     envBtn.classList.toggle("on", filters.envOnly);
     envBtn.setAttribute("aria-pressed", String(filters.envOnly));
+    applyFilters();
+  });
+
+  var priorBtn = document.getElementById("f-prior");
+  var priorCount = findings.filter(function (f) {
+    return f.memory && (f.memory.decision === "deny" || f.memory.decision === "defer");
+  }).length;
+  if (priorCount) {
+    priorBtn.textContent = "Show " + priorCount + " previously decided";
+    priorBtn.setAttribute("aria-pressed", "false");
+  } else {
+    priorBtn.hidden = true;
+  }
+  priorBtn.addEventListener("click", function () {
+    filters.showPrior = !filters.showPrior;
+    priorBtn.setAttribute("aria-pressed", String(filters.showPrior));
     applyFilters();
   });
 
