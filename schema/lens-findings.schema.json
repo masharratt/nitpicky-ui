@@ -8,7 +8,7 @@
   "properties": {
     "lens": {
       "type": "string",
-      "description": "Review source name, e.g. consistency, friction, verbose-language, visual-polish, accessibility — or axe, lighthouse, your-tool."
+      "description": "Review source name, e.g. consistency, friction, clarity, visual-polish, accessibility; or axe, lighthouse, your-tool."
     },
     "coverage": {
       "type": "array",

@@ -28,7 +28,8 @@ Write exactly one JSON file per agent:
 - `what` (required): the observable fact, concrete nouns, where it happens. Not an
   opinion ("bad UX") — a fact ("button disabled with no explanation after submit").
 - `expected` (required): the correct behavior or the concrete fix direction. For
-  copy findings, include the suggested shorter text.
+  copy findings, include the shortest sufficient rewrite when the necessary facts
+  are known; otherwise identify the fact that needs product-owner confirmation.
 - `url` (required): exact page URL of the screenshot.
 - `severity` (required): `high` | `medium` | `low` per the lens contract.
 - `screenshot` (required): path RELATIVE to the run dir, always
@@ -43,6 +44,27 @@ Write exactly one JSON file per agent:
   whole surfaces stuck on spinner, data that should exist not loading. The portal gets
   a filter for it and the merge prints a run-health summary, so mark honestly instead
   of reporting backend noise as app defects.
+
+## Clarity findings
+
+Use the existing fields; no additional fields are required:
+
+- `what`: quote the relevant visible wording, identify the unanswered user question,
+  and explain the likely consequence. Separate observation from inferred impact;
+  do not claim that a user made an error unless observed.
+- `expected`: give the smallest concrete fix that answers that question. Include
+  proposed copy when supported by known facts, or identify the precise product fact
+  that needs confirmation. The fix may be a clearer control or less information,
+  rather than more prose.
+
+Example using these two fields within a complete finding:
+
+```json
+{
+  "what": "The profile banner says '1 of 2 steps ready' without identifying the remaining step. It leaves 'What must I finish?' unanswered. Inferred impact: users may not know whether they need to act.",
+  "expected": "Identify the incomplete step and provide a clearly associated action to open it. Confirm what 'ready' represents before choosing completion wording."
+}
+```
 
 ## Coverage block (same file, top level, required)
 

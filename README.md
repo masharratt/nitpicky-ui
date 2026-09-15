@@ -15,7 +15,7 @@ Works with **any UI that can be screenshotted**. The triage portal works with
 
 Nitpicky is not a UI design system, component library, or style guide, and it has
 no opinions about how your app should look. Its whole purpose is to be nitpicky
-about **what is already built**: the inconsistencies, friction, verbose copy,
+about **what is already built**: the inconsistencies, friction, unclear copy,
 misalignments, and accessibility gaps that slip past a build. Bring your own design
 decisions; nitpicky finds where the implementation drifts from them.
 
@@ -25,7 +25,7 @@ decisions; nitpicky finds where the implementation drifts from them.
  walk ──> merge ──> triage ──> hand off
 ```
 
-1. **Walk**: five lens agents (consistency, friction, verbose language, visual
+1. **Walk**: five lens agents (consistency, friction, clarity, visual
    polish, accessibility) each walk the whole app in their own isolated browser and
    attach screenshot proof to every finding. Contracts:
    [`lib/lenses.md`](lib/lenses.md), [`lib/findings-schema.md`](lib/findings-schema.md),

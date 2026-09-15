@@ -1,7 +1,7 @@
 ---
 name: nitpicky
-description: "Pre-launch visual walkthrough of a full app: spawns parallel per-lens review agents (consistency, friction, verbose language, visual polish, accessibility) that screenshot every page and state, merges findings into a browser triage portal (fix / deny / defer with notes, autosaved to decisions.json on disk via a local server), and exports a hand-off checklist for the implementation team. Use when preparing an app for launch or human testing."
-version: 1.6.0
+description: "Pre-launch visual walkthrough of a full app: spawns parallel per-lens review agents (consistency, friction, clarity, visual polish, accessibility) that screenshot every page and state, merges findings into a browser triage portal (fix / deny / defer with notes, autosaved to decisions.json on disk via a local server), and exports a hand-off checklist for the implementation team. Use when preparing an app for launch or human testing."
+version: 1.7.0
 tags: [review, ux, polish, launch-readiness, playwright, walkthrough, triage]
 status: dev
 category: review
@@ -29,7 +29,7 @@ Tour without any setup: `nitpicky review examples/demo-run`.
 ## Purpose
 
 Catch the small defects that get normalized during a build: inconsistent verbs,
-dead-end states, wordy copy, off-by-pixels polish, missing labels. Parallel agents
+dead-end states, unclear or wordy copy, off-by-pixels polish, missing labels. Parallel agents
 walk the whole running app, one concern each, with screenshot proof for every finding.
 You triage the merged findings in a local browser page (no server), and the export is
 a checklist an implementation team can execute.
@@ -78,7 +78,7 @@ let the user triage. Do not auto-export or auto-implement anything.
      [--routes-file routes.txt] [--redact-file secrets.txt])
    ```
 3. **Spawn one agent per lens in ONE message** (parallel). Default lenses:
-   `consistency`, `friction`, `verbose-language`, `visual-polish`, `accessibility`.
+   `consistency`, `friction`, `clarity`, `visual-polish`, `accessibility`.
    Agent type: one with Playwright browser access (playwright-tester, or
    general-purpose where MCP browser tools are available). Brief template below,
    keep it under ~2KB.
@@ -197,8 +197,9 @@ tab; parallel agents collide there and contaminate each other's evidence.
 
 Summary: this app is being prepared for launch and human testing. Walk the ENTIRE
 app through your lens only. Extreme detail and thoroughness are the job: every page,
-every state, every small defect. Expected finding volume for a real app is high; do
-not stop early. Every finding needs a screenshot saved into the screenshots dir
+every state, every small defect. Report every supported issue without a target
+finding count; a reviewed surface can have no findings, but never stop the
+walkthrough early. Every finding needs a screenshot saved into the screenshots dir
 named <lens>-<short-slug>.png and referenced as "screenshots/<file>.png". Report
 your walked/blocked/skipped routes in the coverage block, and mark findings
 `suspected_env_cause: true` when the failure looks server-side. Output JSON only,
@@ -216,6 +217,10 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 ```
 
 ## Resume / re-run
+
+- New reviews use `clarity`, which includes the former `verbose-language` checks.
+  Keep historical lens names and findings intact; renaming them changes finding IDs
+  and can disconnect saved decisions.
 
 - Decisions persist in the browser's storage keyed by run id. Re-opening
   `review.html` restores them. Same-browser, same-machine persistence only.
@@ -267,6 +272,17 @@ You are a leaf agent. Do not spawn subagents; do the work yourself.
 
 ## Version History
 
+- **1.7.0** (2026-09-14): Clarity lens. `verbose-language` replaced by `clarity`,
+  which subsumes the conciseness checks and adds the information test: every
+  displayed piece must be understandable (meaning), say whether action is
+  expected and what + how, and justify its display when no action is expected.
+  Lens boundary paragraph (clarity owns comprehension, friction owns the loop
+  working, consistency owns cross-surface agreement); findings `expected` may
+  name the product fact needing confirmation instead of a rewrite; report-volume
+  rule rewritten (no target count, no invented findings, but never stop the
+  walkthrough early). Cross-run decision memory unaffected (matching is route +
+  tokens, lens is metadata); historical verbose-language findings keep their
+  lens name and ids.
 - **1.6.0** (2026-09-14): Cross-run decision memory. Export/submit records
   decided findings (fix/defer/deny + notes) per app in
   `planning/nitpicky/memory.json`; later runs match findings against it

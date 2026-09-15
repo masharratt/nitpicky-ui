@@ -20,10 +20,6 @@ these in the first ten minutes and judge the app by them. Find them first.
 1. **Walk every reachable page. Never sample.** If a nav item, tab, footer link,
    settings row, or route exists, it gets visited. An unvisited page is an unreviewed
    page — record it in your coverage block as blocked/skipped with the reason.
-
-1. **Walk every reachable page. Never sample.** If a nav item, tab, footer link,
-   settings row, or route exists, it gets visited. An unvisited page is an unreviewed
-   page.
 2. **Exercise every state, not just the happy one:**
    - Forms: submit empty, submit invalid, submit valid, submit twice fast, abandon
      halfway and come back.
@@ -43,9 +39,12 @@ these in the first ten minutes and judge the app by them. Find them first.
    silently with no feedback; dead links; tooltips that describe the wrong thing.
 4. **Screenshot proof for every finding.** A finding without a screenshot does not
    ship. When the finding is a comparison (this page vs that page), capture both.
-5. **Report volume is expected.** A real app at launch readiness yields dozens of
-   findings across all lenses. Reporting many low-severity nits is the job; do not
-   self-censor small items, and do not pad with made-up ones either.
+5. **Report every supported issue without a target count.** Keep concrete
+   low-severity nits, distinguish preferences from defects, and do not invent or
+   inflate findings. A fully reviewed surface can have no findings, and
+   thoroughness is demonstrated by coverage and evidence, not report volume.
+   Never stop the walkthrough early because findings are few: explore every page
+   and state fully, then report what you found.
 6. **Severity scale:**
    - `high` — would embarrass the team at launch or confuse a first-time user
      (broken flow, data loss, wrong/missing feedback on a primary action, offensive
@@ -75,6 +74,12 @@ these in the first ten minutes and judge the app by them. Find them first.
 Walk the whole app through **only your lens**. Other lenses have their own agents; do
 not duplicate their work, but do record anything glaring you cannot un-see.
 
+Clarity owns comprehension of information, choices, consequences, and next steps.
+Friction owns whether the task, recovery, and save/completion loop actually work.
+Consistency owns agreement across surfaces. For a shared symptom, report it under
+the primary concern rather than creating separate wording and behavior findings
+unless they are independently actionable.
+
 ### consistency
 Same concept, same word, everywhere. Same action, same verb, everywhere. Button
 hierarchy (primary/secondary/danger) used the same way on every page. One spacing
@@ -93,12 +98,41 @@ hazards (no disable during request). Error messages that say "Something went wro
 without saying what to do next. Required fields discovered only after submit.
 Multi-step flows that could be one step.
 
-### verbose-language
-UI copy that uses twenty words where three work. "Please click here in order to..."
-vs "Save". Marketing fluff inside product UI. Paragraphs where a label works.
-Instructions that restate the obvious. Confirmation dialogs that lecture. Wordy empty
-states. Inconsistent tone (formal here, casual there). Jargon the target user would
-not know. Suggested rewrite belongs in the `expected` field: state the shorter copy.
+### clarity
+Can the intended user, including a first-time user, understand the information and
+make an informed choice? Review statuses, metrics, badges, notices, labels, helper
+copy, and empty states in their visible context:
+
+- **Meaning:** what does this describe, and what does the value or state mean?
+  Look for raw IDs, cryptic codes, unexplained jargon, ambiguous status words, and
+  metrics missing units, timeframe, scope, or a useful comparison.
+- **Relevance:** why does it matter to the user's current task or decision?
+- **Action:** is action required, optional, or unnecessary? When actionable, can
+  users find what to do and how at the point of need? A clearly associated control
+  can be sufficient; do not require explanatory prose beside every familiar control.
+- **Consequences and expectations:** before a choice, is it clear what changes,
+  who can see the information, and whether it saves immediately or needs a final
+  step? Afterward, can users tell what happened and what happens next? Check that
+  editing an existing record is not misleadingly described as first-time setup.
+- **Purpose of passive information:** without an action, does it support orientation,
+  reassurance, progress, comparison, reference, or required disclosure? If no clear
+  purpose is apparent, propose removing it or moving it into details. Do not remove
+  useful read-only information simply because it has no action, or add "No action
+  needed" everywhere.
+
+Clarity includes concise copy: redundant instructions, marketing fluff inside the
+product, lecturing confirmations, wordy empty states, and inconsistent tone. Prefer
+the shortest copy that preserves meaning and enables the task. A necessary
+explanation may be longer. Do not sacrifice accessibility or required disclosure.
+
+Flag missing product facts without inventing them. Unknown timing, visibility rules,
+or save behavior need confirmation before a definitive rewrite. Identify a confusing
+tradeoff without deciding product policy on the user's behalf. For example, "1 of 2
+steps ready" leaves "Which step remains, and what must I do?" unanswered; "Matches
+arrive soon" may need both a definition and a product-confirmed availability window.
+
+Use the existing `what` and `expected` fields to report the unanswered user question,
+likely consequence, and smallest concrete fix, per `lib/findings-schema.md`.
 
 ### visual-polish
 Misalignment by a few pixels (against siblings, grid, and edges). Inconsistent corner

@@ -2,6 +2,26 @@
 
 All notable changes to nitpicky.
 
+## 1.7.0 — 2026-09-14
+
+Clarity lens: `verbose-language` becomes `clarity`, adding a comprehension test
+to the conciseness checks.
+
+- Every displayed piece of information judged for meaning, required action
+  (what + how, at the point of need), and purpose when no action is expected;
+  purposeless display proposed for removal, useful read-only information kept.
+- Conciseness folded in: prefer the shortest copy that preserves meaning; a
+  necessary explanation may be longer.
+- Copy fixes that need a product fact (timing, visibility, save behavior) name
+  that fact for confirmation instead of inventing wording.
+- Lens boundaries documented: clarity comprehension, friction the working loop,
+  consistency cross-surface agreement; shared symptoms reported once under the
+  primary concern.
+- Report-volume rule rewritten: no target count, no invented findings, but the
+  walkthrough never stops early.
+- Cross-run decision memory unaffected; historical `verbose-language` findings
+  keep their lens name and ids.
+
 ## 1.6.0 — 2026-09-14
 
 Cross-run decision memory: repeated runs stop re-flagging what you already settled.
